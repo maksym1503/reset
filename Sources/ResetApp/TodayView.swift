@@ -1,5 +1,5 @@
 import SwiftUI
-import AppFoundation
+import ResetFoundation
 import ResetCore
 
 struct ResetWelcome: View { let finish: () -> Void; var body: some View { VStack(spacing: 24) { Spacer(); Image(systemName: "arrow.triangle.2.circlepath").font(.system(size: 68)).foregroundStyle(ResetTokens.accent); Text("Reset your space").font(.largeTitle.bold()).multilineTextAlignment(.center); Text("Take two minutes to clear your desk. A calmer workspace makes a calmer start.").font(.title3).multilineTextAlignment(.center).foregroundStyle(.secondary); Spacer(); Button("Start fresh", action: finish).buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity) }.padding(28).background(ResetTokens.wash).tint(ResetTokens.accent) } }
