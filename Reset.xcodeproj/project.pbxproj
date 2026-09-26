@@ -1,0 +1,94 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A00000000000000000000004 /* ResetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000014 /* ResetApp.swift */; };
+		B00000000000000000000080 = {isa = PBXBuildFile; fileRef = A00000000000000000000080; };
+		B00000000000000000000081 = {isa = PBXBuildFile; fileRef = A00000000000000000000081; };
+		B00000000000000000000082 = {isa = PBXBuildFile; fileRef = A00000000000000000000082; };
+		B00000000000000000000083 = {isa = PBXBuildFile; fileRef = A00000000000000000000083; };
+		B00000000000000000000090 = {isa = PBXBuildFile; productRef = C00000000000000000000090; };
+		B00000000000000000000091 = {isa = PBXBuildFile; productRef = C00000000000000000000091; };
+		E00000000000000000000001 = {isa = PBXBuildFile; fileRef = E00000000000000000000002; };
+		A00000000000000000000005 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000017; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A00000000000000000000010 /* Reset.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reset.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00000000000000000000011 /* FoundationTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationTokens.swift; sourceTree = "<group>"; };
+		A00000000000000000000012 /* ResetCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetCore.swift; sourceTree = "<group>"; };
+		A00000000000000000000014 /* ResetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/ResetApp/ResetApp.swift; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ResetInfo.plist; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000017 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/ResetApp/WelcomeView.swift; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000016 /* Reset.xcscheme */ = {isa = PBXFileReference; lastKnownFileType = text; path = Reset.xcscheme; sourceTree = "<group>"; };
+		A00000000000000000000080 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/ResetApp/TodayView.swift; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000081 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/ResetApp/HabitComponents.swift; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000082 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/ResetApp/ProgressViewScreen.swift; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000083 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sources/ResetApp/SettingsView.swift; sourceTree = SOURCE_ROOT; };
+		E00000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tests/ResetUITests/ResetUITests.swift; sourceTree = SOURCE_ROOT; };
+		E00000000000000000000003 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = ResetUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A00000000000000000000020 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (B00000000000000000000090, B00000000000000000000091); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A00000000000000000000030 = {isa = PBXGroup; children = (E00000000000000000000002, A00000000000000000000031, A00000000000000000000032, A00000000000000000000033, A00000000000000000000034, A00000000000000000000035); sourceTree = "<group>"; };
+		A00000000000000000000031 /* Reset */ = {isa = PBXGroup; children = (A00000000000000000000080, A00000000000000000000081, A00000000000000000000082, A00000000000000000000083, A00000000000000000000014, A00000000000000000000015); path = Reset; sourceTree = "<group>"; };
+		A00000000000000000000032 /* AppFoundation */ = {isa = PBXGroup; children = (A00000000000000000000011); path = Sources/AppFoundation; sourceTree = "<group>"; };
+		A00000000000000000000033 /* ResetCore */ = {isa = PBXGroup; children = (A00000000000000000000012); path = Sources/ResetCore; sourceTree = "<group>"; };
+		A00000000000000000000034 /* Products */ = {isa = PBXGroup; children = (A00000000000000000000010, E00000000000000000000003); name = Products; sourceTree = "<group>"; };
+		A00000000000000000000035 /* Schemes */ = {isa = PBXGroup; children = (A00000000000000000000016); path = Reset.xcodeproj/xcshareddata/xcschemes; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A00000000000000000000040 /* Reset */ = {isa = PBXNativeTarget; buildConfigurationList = A00000000000000000000060 /* Build configuration list for PBXNativeTarget "Reset" */; buildPhases = (A00000000000000000000041, A00000000000000000000020, A00000000000000000000042); buildRules = (); dependencies = (); name = Reset; packageProductDependencies = (C00000000000000000000090, C00000000000000000000091); productName = Reset; productReference = A00000000000000000000010 /* Reset.app */; productType = "com.apple.product-type.application"; };
+		E00000000000000000000004 = {isa = PBXNativeTarget; buildConfigurationList = E00000000000000000000005; buildPhases = (E00000000000000000000006); buildRules = (); dependencies = (E00000000000000000000007); name = ResetUITests; productName = ResetUITests; productReference = E00000000000000000000003; productType = "com.apple.product-type.bundle.ui-testing"; };
+/* End PBXNativeTarget section */
+		E00000000000000000000006 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (E00000000000000000000001); runOnlyForDeploymentPostprocessing = 0; };
+		E00000000000000000000007 = {isa = PBXTargetDependency; target = A00000000000000000000040; targetProxy = E00000000000000000000008; };
+		E00000000000000000000008 = {isa = PBXContainerItemProxy; containerPortal = A00000000000000000000050; proxyType = 1; remoteGlobalIDString = A00000000000000000000040; remoteInfo = Reset; };
+		E00000000000000000000005 = {isa = XCConfigurationList; buildConfigurations = (E00000000000000000000009, E00000000000000000000010); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		E00000000000000000000009 = {isa = XCBuildConfiguration; buildSettings = {GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.reset.app.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 5.9; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = Reset; }; name = Debug; };
+		E00000000000000000000010 = {isa = XCBuildConfiguration; buildSettings = {GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.reset.app.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 5.9; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = Reset; }; name = Release; };
+
+/* Begin PBXProject section */
+		A00000000000000000000050 /* Project object */ = {isa = PBXProject; attributes = {LastUpgradeCheck = 2660; TargetAttributes = {A00000000000000000000040 = {CreatedOnToolsVersion = 26.6; }; }; }; buildConfigurationList = A00000000000000000000070 /* Build configuration list for PBXProject "Reset" */; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = A00000000000000000000030; productRefGroup = A00000000000000000000034 /* Products */; packageReferences = (D00000000000000000000090); projectDirPath = ""; projectRoot = ""; targets = (A00000000000000000000040 /* Reset */, E00000000000000000000004); };
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A00000000000000000000042 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A00000000000000000000041 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000004, A00000000000000000000005, B00000000000000000000083, B00000000000000000000082, B00000000000000000000081, B00000000000000000000080); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		D00000000000000000000090 = {isa = XCLocalSwiftPackageReference; relativePath = .; };
+/* End XCLocalSwiftPackageReference section */
+/* Begin XCSwiftPackageProductDependency section */
+		C00000000000000000000090 = {isa = XCSwiftPackageProductDependency; productName = AppFoundation; };
+		C00000000000000000000091 = {isa = XCSwiftPackageProductDependency; productName = ResetCore; };
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A00000000000000000000071 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CURRENT_PROJECT_VERSION = 2; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = ResetInfo.plist; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.reset.app; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 5.9; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
+		A00000000000000000000072 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CURRENT_PROJECT_VERSION = 2; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = ResetInfo.plist; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = com.reset.app; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SWIFT_VERSION = 5.9; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
+		A00000000000000000000073 /* Project Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; ONLY_ACTIVE_ARCH = YES; }; name = Debug; };
+		A00000000000000000000074 /* Project Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; SWIFT_OPTIMIZATION_LEVEL = "-O"; }; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A00000000000000000000060 /* Build configuration list for PBXNativeTarget "Reset" */ = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000071, A00000000000000000000072); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		A00000000000000000000070 /* Build configuration list for PBXProject "Reset" */ = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000073, A00000000000000000000074); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = A00000000000000000000050 /* Project object */;
+}

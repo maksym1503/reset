@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+case "${1:-check}" in
+  test) swift test ;;
+  build) xcodebuild -project Reset.xcodeproj -scheme Reset -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build ;;
+  check) swift test && xcodebuild -project Reset.xcodeproj -scheme Reset -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build ;;
+  *) echo "Usage: ./dev {test|build|check}"; exit 2 ;;
+esac
