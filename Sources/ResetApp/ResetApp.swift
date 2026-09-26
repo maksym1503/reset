@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftData
-import AppFoundation
+import ResetFoundation
 import ResetCore
 
 @main struct ResetApp: App { var body: some Scene { WindowGroup { ResetStartup() } } }

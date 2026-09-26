@@ -7,5 +7,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Swift tests
         run: swift test
-      - name: iPhone Simulator build
-        run: xcodebuild -project Reset.xcodeproj -scheme Reset -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+      - name: iPhone Simulator app and UI-test build
+        run: xcodebuild -project Reset.xcodeproj -scheme Reset -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build-for-testing

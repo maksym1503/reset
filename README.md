@@ -10,3 +10,5 @@ xcodebuild -project Reset.xcodeproj -scheme Reset -destination 'generic/platform
 ```
 
 The app is local-first, account-free and iPhone-only. Its custom URL scheme is `reset://` for MaxLab.
+
+The shared App Lab workspace can open this project alongside Gamefy and MaxLab. The existing `Sources/AppFoundation` code is exported as `ResetFoundation` to avoid conflicting with Gamefy's `AppFoundation` product. No sibling checkout or private package credentials are required for standalone builds.
