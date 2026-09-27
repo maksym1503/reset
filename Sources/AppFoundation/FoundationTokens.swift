@@ -35,9 +35,29 @@ public enum FoundationTokens {
         Color(nsColor: .secondaryLabelColor)
         #endif
     }
+    public static var sceneTop: Color {
+        #if os(iOS)
+        Color(uiColor: .init { traits in traits.userInterfaceStyle == .dark ? .init(red: 0.08, green: 0.18, blue: 0.18, alpha: 1) : .init(red: 0.78, green: 0.93, blue: 0.88, alpha: 1) })
+        #else
+        Color.teal.opacity(0.2)
+        #endif
+    }
+    public static var sceneBottom: Color {
+        #if os(iOS)
+        Color(uiColor: .init { traits in traits.userInterfaceStyle == .dark ? .init(red: 0.16, green: 0.15, blue: 0.18, alpha: 1) : .init(red: 0.92, green: 0.84, blue: 0.70, alpha: 1) })
+        #else
+        Color.orange.opacity(0.2)
+        #endif
+    }
     // Filled controls use a deeper color so white labels stay readable.
-    public static let action = Color(red: 0.12, green: 0.30, blue: 0.67)
-    public static let success = Color(red: 0.12, green: 0.43, blue: 0.29)
+    public static var action: Color { primary }
+    public static var success: Color {
+        #if os(iOS)
+        Color(uiColor: .systemGreen)
+        #else
+        .green
+        #endif
+    }
 }
 
 public struct FoundationCard<Content: View>: View {

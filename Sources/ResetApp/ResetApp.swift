@@ -27,7 +27,11 @@ enum ResetTokens {
             ? UIColor(red: 0.43, green: 0.83, blue: 0.73, alpha: 1)
             : UIColor(red: 0.10, green: 0.37, blue: 0.32, alpha: 1)
     })
-    static let action = Color(red: 0.10, green: 0.37, blue: 0.32)
+    static let action = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.22, green: 0.58, blue: 0.49, alpha: 1)
+            : UIColor(red: 0.10, green: 0.37, blue: 0.32, alpha: 1)
+    })
     static let ink = Color.primary
     static var wash: Color { FoundationTokens.background }
 }
