@@ -1,0 +1,21 @@
+# V5 design plan — before implementation
+
+Research: Finch (https://finchcare.com/about-finch) ties care to a companion and its home; Plant Nanny (https://sparkful.app/plant-nanny) makes the daily action visibly nurture the environment; Waterful (https://waterfulapp.com) keeps logging short and rewards legible. Adopt emotional reciprocity and physical cause/effect, without borrowing artwork, characters, brand copy, shops or layouts.
+
+Technical references: HorizonCalendar's declarative day selection, custom cells and horizontal paging (https://github.com/airbnb/HorizonCalendar); ScreenPets' Canvas drawing and pet lifecycle (https://github.com/sealovesky/ScreenPets); PetPlayground's independent pet animation (https://github.com/MaxHan7/PetPlayground); Prism's layered perspective composition (https://github.com/aheze/Prism). ScreenPets uses a display link; do not adopt a permanent frame loop for our mostly stationary rooms. Apple WWDC24 Dynamic Type guidance informs semantic type and responsive stacks (https://developer.apple.com/videos/play/wwdc2024/10074/).
+
+Art: original cut-paper storybook rooms with sculpted silhouettes, warm wood, fabric seams, cast shadows and selective highlights. Gamefy: arched dawn window, curtains, perspective bed, rumpled quilt becoming smooth, pillow pair, bedside light, woven rug and growing plant. Reset: evening studio, articulated lamp, monitor, paper stack, ceramic cup, desk grain and organized stationery. No SF Symbols in environmental art.
+
+Mochi: retain the soft blue identity; give it a folded crown tuft, pear-shaped torso, cream face patch, cheek markings, mitten hands, little feet, a stitched neckerchief and shaded edges. Sitting, reaching, stretching, proud and relaxed poses. Irregular one-shot idle events; cancel tasks when backgrounded, off-screen or covered; no repeating blink animation.
+
+Hierarchy: concise greeting/date, generous continuous scene with embedded gesture and companion, one short instruction, then a foreground progression vignette. Progress: title, readable streak/level, existing seven-day strip and expandable 28-day history, followed by illustrated unlocks and room evolution. No dashboard containers. Scene artwork scales with width and available height; text scrolls at accessibility sizes.
+
+Typography: rounded semantic title/title2, headline actions, body instructions, subheadline context, caption metadata. Fixed-size artwork text prohibited. Headers and metrics stack for large type. VoiceOver actions parallel gestures.
+
+Color: one semantic palette per app covering paper/wall, floor, ink, secondary ink, accent, filled-control ink, cloth, wood, sky and light. Light is airy blue/teal and warm cream; dark is blue dawn/teal evening with warm lamp light, never empty black. The same palette spans Today, Progress, Settings and sheets.
+
+Parity: common companion and history presentation sources are kept identical in the existing independently vendored foundation targets. Product art and progression thresholds stay in app code. Both history UIs keep the seven-day/28-day model, expose add/remove confirmations only for past days, and recompute from saved records. Gamefy keeps XP; Reset keeps reset counts. Both keep the same native tabs and completion undo.
+
+Validation: local builds and existing core checks, narrow history-edit tests, real UI gesture/edit flows and screenshot attachments on a disposable simulator. Inspect light/dark, before/during/after, both calendars, historical edit, onboarding and accessibility text. Commit through branches/PRs, check exact head CI. Physical 120Hz feel cannot be claimed from simulator.
+
+Gesture implementation follow-up: Apple’s iOS 26 release notes clarify that descendant simultaneous gestures do not automatically cooperate with ancestor gestures (https://developer.apple.com/documentation/ios-ipados-release-notes/ios-ipados-26-release-notes). Visual testing reproduced that conflict on Gamefy’s large-text screen. `RitualScrollView` now attaches the custom gesture to the scroll view itself and gates it by the habit object’s global hit region and horizontal direction. `GestureState` resets transient progress on release/cancellation. No UIKit bridge or gesture runtime was added.
