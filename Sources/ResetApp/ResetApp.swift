@@ -42,3 +42,17 @@ struct ResetProgressView: View {
         HStack(alignment: .top, spacing: 18) { Text("3 resets\n\(session.progress.total >= 3 ? "Plant on the desk" : "Plant detail")").font(.subheadline.weight(.semibold)); Rectangle().fill(ResetTokens.accent.opacity(0.25)).frame(height: 2).padding(.top, 8); Text("7 resets\n\(session.progress.total >= 7 ? "Calmer corner" : "\(session.progress.total)/7")").font(.subheadline.weight(.semibold)) }
     }.padding(20) }.background(ResetTokens.wash).sheet(isPresented: Binding(get: { selectedDate != nil }, set: { if !$0 { selectedDate = nil } })) { if let date = selectedDate { ResetDateDetail(date: date, completed: session.progress.history.contains(ResetDay.key(date)), canCorrect: date < Date()) { session.perform { try $0.complete(on: date) }; selectedDate = nil } } } }
 }
+
+struct ResetDateDetail: View {
+    let date: Date
+    let completed: Bool
+    let canCorrect: Bool
+    let correct: () -> Void
+    var body: some View { VStack(spacing: 15) {
+        Capsule().fill(ResetTokens.accent.opacity(0.25)).frame(width: 38, height: 5)
+        Text(date, format: .dateTime.weekday(.wide).month(.wide).day()).font(.title2.bold())
+        Image(systemName: completed ? "sparkles" : "square.and.pencil").font(.system(size: 34)).foregroundStyle(ResetTokens.accent)
+        Text(completed ? "The workspace was reset this day." : date > Date() ? "This day has not arrived yet." : "This past reset is still open.").foregroundStyle(FoundationTokens.muted).multilineTextAlignment(.center)
+        if canCorrect && !completed { Button("Mark as reset", action: correct).buttonStyle(.borderedProminent).tint(ResetTokens.action) }
+    }.padding(28).presentationDetents([.medium]) }
+}
