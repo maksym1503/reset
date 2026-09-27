@@ -7,12 +7,8 @@ struct ResetWelcome: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                Image(systemName: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 52, weight: .medium))
-                    .foregroundStyle(ResetTokens.accent)
-                    .frame(width: 108, height: 108)
-                    .background(ResetTokens.accent.opacity(0.10), in: RoundedRectangle(cornerRadius: 28))
-                    .accessibilityHidden(true)
+                CompanionView(mood: .waking, accent: ResetTokens.accent)
+                    .frame(height: 118)
                 Text("Reset your space").font(.largeTitle.bold())
                 Text("Take two minutes to clear your desk. A calmer workspace makes a calmer start.")
                     .font(.title3).foregroundStyle(FoundationTokens.muted)
