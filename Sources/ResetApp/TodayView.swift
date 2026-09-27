@@ -30,6 +30,7 @@ struct ResetWelcome: View {
 struct ResetToday: View {
     let session: ResetSession
     @State private var show = false
+    @State private var companionMessage = false
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -37,6 +38,13 @@ struct ResetToday: View {
                     Text("RESET").font(.caption.weight(.bold)).tracking(2).foregroundStyle(ResetTokens.accent)
                     Text("Your desk, reset.").font(.largeTitle.bold())
                 }
+                Button { withAnimation(.spring(response: 0.35)) { companionMessage.toggle() } } label: {
+                    VStack(spacing: 8) {
+                        CompanionView(mood: session.completed ? .calm : .idle, accent: ResetTokens.accent).frame(height: 118)
+                        Text(companionMessage ? "Mochi is keeping the workspace calm." : session.completed ? "Mochi can finally relax." : "Mochi found a few things out of place.")
+                            .font(.subheadline.weight(.medium)).foregroundStyle(.primary)
+                    }.frame(maxWidth: .infinity)
+                }.buttonStyle(.plain)
                 FoundationCard {
                     VStack(spacing: 20) {
                         Label(session.completed ? "Completed today" : "Your daily reset", systemImage: session.completed ? "checkmark.seal.fill" : "sparkles")
@@ -155,35 +163,30 @@ struct ResetProgressView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Progress").font(.largeTitle.bold())
+                Text("Your rhythm").font(.largeTitle.bold())
                 Text("A little space, a little more calm.").foregroundStyle(FoundationTokens.muted)
-                FoundationCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("Your rhythm", systemImage: "flame.fill").font(.headline).foregroundStyle(ResetTokens.accent)
-                        Text("\(progress.streak) days").font(.largeTitle.bold()).monospacedDigit()
-                        Text("Best streak: \(progress.bestStreak) days").font(.subheadline).foregroundStyle(FoundationTokens.muted)
-                    }
-                }
-                FoundationCard {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Recent resets").font(.headline)
-                        ForEach((0..<7).reversed(), id: \.self) { i in
-                            let day = Calendar.current.date(byAdding: .day, value: -i, to: Date())!
-                            let done = progress.history.contains(ResetDay.key(day))
-                            HStack {
-                                Text(day, format: .dateTime.weekday(.wide))
-                                Spacer(minLength: 12)
-                                Image(systemName: done ? "checkmark.circle.fill" : "circle")
-                                    .font(.title3).foregroundStyle(done ? ResetTokens.accent : FoundationTokens.muted)
-                            }
-                            .accessibilityElement(children: .combine)
-                            .accessibilityLabel("\(day.formatted(date: .complete, time: .omitted)), \(done ? "reset complete" : "not reset")")
-                            if i != 0 { Divider() }
-                        }
-                    }
-                }
+                HStack(spacing: 16) { CompanionView(mood: .happy, accent: ResetTokens.accent).frame(width: 92, height: 92); VStack(alignment: .leading, spacing: 4) { Text("\(progress.streak) days").font(.title.bold()).monospacedDigit(); Text("Best: \(progress.bestStreak) days").font(.subheadline).foregroundStyle(FoundationTokens.muted) } }
+                ResetTimeline(progress: progress)
             }.padding(20)
         }.background(ResetTokens.wash)
+    }
+}
+
+struct ResetTimeline: View {
+    let progress: ResetProgress
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Recent resets").font(.headline)
+            ForEach(Array((0..<10).reversed().enumerated()), id: \.element) { index, offset in
+                let day = Calendar.current.date(byAdding: .day, value: -offset, to: Date())!
+                let done = progress.history.contains(ResetDay.key(day))
+                HStack(spacing: 14) {
+                    VStack(spacing: 0) { Circle().fill(done ? ResetTokens.accent : ResetTokens.accent.opacity(0.18)).frame(width: 18, height: 18).overlay { if done { Image(systemName: "checkmark").font(.caption2.bold()).foregroundStyle(.white) } }; if index < 9 { Rectangle().fill(ResetTokens.accent.opacity(0.18)).frame(width: 2, height: 28) } }
+                    VStack(alignment: .leading, spacing: 3) { Text(day, format: .dateTime.weekday(.wide)).font(.body.weight(.medium)); Text(done ? "Workspace settled" : "A day still ahead").font(.caption).foregroundStyle(FoundationTokens.muted) }
+                    Spacer()
+                }.accessibilityElement(children: .combine).accessibilityLabel("\(day.formatted(date: .complete, time: .omitted)), \(done ? "reset complete" : "not reset")")
+            }
+        }.padding(18).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 
