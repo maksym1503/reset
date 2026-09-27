@@ -35,7 +35,17 @@ public enum ResetDay {
     private let calendar: Calendar
     public init(context: ModelContext, clock: ResetClock = ResetClock(), calendar: Calendar = ResetDay.calendar()) throws { self.context = context; self.clock = clock; self.calendar = ResetDay.calendar(timeZone: calendar.timeZone); context.autosaveEnabled = false; try context.save() }
     @discardableResult public func complete() throws -> Bool { try complete(on: clock.now()) }
-    @discardableResult public func complete(on date: Date) throws -> Bool { let key = ResetDay.key(date, calendar: calendar); guard try today(key) == nil else { return false }; context.insert(ResetRecord(localDate: key, completedAt: clock.now())); try context.save(); return true }
+    @discardableResult public func complete(on date: Date) throws -> Bool { guard calendar.startOfDay(for: date) <= calendar.startOfDay(for: clock.now()) else { return false }; let key = ResetDay.key(date, calendar: calendar); guard try today(key) == nil else { return false }; context.insert(ResetRecord(localDate: key, completedAt: clock.now())); try context.save(); return true }
+    @discardableResult public func setHistoricalCompletion(on date: Date, completed: Bool) throws -> Bool {
+        guard calendar.startOfDay(for: date) < calendar.startOfDay(for: clock.now()) else { return false }
+        if completed {
+            do { return try complete(on: date) } catch { context.rollback(); throw error }
+        }
+        guard let record = try today(ResetDay.key(date, calendar: calendar)) else { return false }
+        context.delete(record)
+        do { try context.save() } catch { context.rollback(); throw error }
+        return true
+    }
     public func undoToday() throws { if let record = try today(ResetDay.key(clock.now(), calendar: calendar)) { context.delete(record); try context.save() } }
     public func reset() throws { try all().forEach(context.delete); try context.save() }
     public func progress() throws -> ResetProgress { let records = try all(); let dates = Set(records.compactMap { ResetDay.date($0.localDate, calendar: calendar) }); let sorted = dates.sorted(); let today = calendar.startOfDay(for: clock.now()); var cursor = dates.contains(today) ? today : calendar.date(byAdding: .day, value: -1, to: today)!; var streak = 0; while dates.contains(cursor) { streak += 1; cursor = calendar.date(byAdding: .day, value: -1, to: cursor)! }; var best = 0; var run = 0; for i in sorted.indices { run = i > 0 && calendar.date(byAdding: .day, value: 1, to: sorted[i - 1]) == sorted[i] ? run + 1 : 1; best = max(best, run) }; return ResetProgress(total: dates.count, streak: streak, bestStreak: best, level: 1 + dates.count / 5, history: records.map(\.localDate)) }
