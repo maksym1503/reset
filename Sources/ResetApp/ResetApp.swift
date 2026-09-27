@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import SwiftData
 import ResetFoundation
 import ResetCore
@@ -20,4 +21,13 @@ import ResetCore
     var body: some View { TabView { ResetToday(session: session).tabItem { Label("Today", systemImage: "sparkles") }; ResetProgressView(progress: session.progress).tabItem { Label("Progress", systemImage: "chart.bar.xaxis") }; ResetSettings(session: session).tabItem { Label("Settings", systemImage: "slider.horizontal.3") } }.tint(ResetTokens.accent).onChange(of: phase) { _, v in if v == .active { session.perform() } }.alert("Couldn’t update Reset", isPresented: Binding(get: { session.error != nil }, set: { if !$0 { session.error = nil } })) { Button("OK", role: .cancel) {} } message: { Text(session.error ?? "") } }
 }
 
-enum ResetTokens { static let accent = Color(red: 0.17, green: 0.47, blue: 0.43); static let ink = Color(red: 0.10, green: 0.14, blue: 0.15); static let wash = Color(red: 0.93, green: 0.96, blue: 0.94) }
+enum ResetTokens {
+    static let accent = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.43, green: 0.83, blue: 0.73, alpha: 1)
+            : UIColor(red: 0.10, green: 0.37, blue: 0.32, alpha: 1)
+    })
+    static let action = Color(red: 0.10, green: 0.37, blue: 0.32)
+    static let ink = Color.primary
+    static var wash: Color { FoundationTokens.background }
+}
