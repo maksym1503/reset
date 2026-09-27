@@ -59,7 +59,7 @@ public struct FoundationCard<Content: View>: View {
     }
 }
 
-public enum CompanionMood: Equatable { case sleepy, idle, waking, happy, celebration, calm }
+public enum CompanionMood: Equatable { case sleepy, curious, idle, waking, happy, celebration, calm }
 
 public struct CompanionView: View {
     public let mood: CompanionMood
@@ -80,7 +80,17 @@ public struct CompanionView: View {
             HStack(spacing: 72) { Capsule().fill(accent.opacity(0.8)).frame(width: 15, height: 42).rotationEffect(.degrees(mood == .celebration ? -28 : 12)); Capsule().fill(accent.opacity(0.8)).frame(width: 15, height: 42).rotationEffect(.degrees(mood == .celebration ? 28 : -12)) }.offset(y: 8)
             if mood == .celebration || mood == .happy { Text("✦").font(.title2.bold()).foregroundStyle(.yellow).offset(x: 60, y: -55) }
         }.scaleEffect(breathing && !reduceMotion ? 1.035 : 1).rotationEffect(.degrees(mood == .celebration && !reduceMotion ? (breathing ? 2 : -2) : 0))
-            .onAppear { guard !reduceMotion else { return }; withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) { breathing = true }; withAnimation(.easeInOut(duration: 0.12).repeatForever(autoreverses: false).delay(2.4)) { blink = true } }
+            .task(id: reduceMotion) {
+                guard !reduceMotion else { return }
+                withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) { breathing = true }
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(Double.random(in: 3.5...7.5)))
+                    guard !Task.isCancelled else { return }
+                    withAnimation(.easeInOut(duration: 0.09)) { blink = true }
+                    try? await Task.sleep(for: .milliseconds(120))
+                    withAnimation(.easeInOut(duration: 0.09)) { blink = false }
+                }
+            }
             .accessibilityLabel("Mochi, your companion")
     }
 }

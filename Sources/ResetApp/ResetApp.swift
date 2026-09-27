@@ -18,7 +18,7 @@ import ResetCore
 }
 
 @MainActor struct ResetRoot: View { @Bindable var session: ResetSession; @Environment(\.scenePhase) private var phase
-    var body: some View { TabView { ResetToday(session: session).tabItem { Label("Today", systemImage: "sparkles") }; ResetProgressView(progress: session.progress).tabItem { Label("Progress", systemImage: "chart.bar.xaxis") }; ResetSettings(session: session).tabItem { Label("Settings", systemImage: "slider.horizontal.3") } }.tint(ResetTokens.accent).onChange(of: phase) { _, v in if v == .active { session.perform() } }.alert("Couldn’t update Reset", isPresented: Binding(get: { session.error != nil }, set: { if !$0 { session.error = nil } })) { Button("OK", role: .cancel) {} } message: { Text(session.error ?? "") } }
+    var body: some View { TabView { ResetToday(session: session).tabItem { Label("Today", systemImage: "sparkles") }; ResetProgressView(session: session).tabItem { Label("Progress", systemImage: "chart.bar.xaxis") }; ResetSettings(session: session).tabItem { Label("Settings", systemImage: "slider.horizontal.3") } }.tint(ResetTokens.accent).onChange(of: phase) { _, v in if v == .active { session.perform() } }.alert("Couldn’t update Reset", isPresented: Binding(get: { session.error != nil }, set: { if !$0 { session.error = nil } })) { Button("OK", role: .cancel) {} } message: { Text(session.error ?? "") } }
 }
 
 enum ResetTokens {
