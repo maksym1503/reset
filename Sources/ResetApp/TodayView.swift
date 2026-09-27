@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 import ResetFoundation
 import ResetCore
 
@@ -28,7 +27,7 @@ struct ResetWorld: View { let level: Int; let clean: Bool; var body: some View {
 
 struct SwipeToReset: View {
     let action: () -> Void; @State private var offset: CGFloat = 0
-    var body: some View { GeometryReader { geo in ZStack(alignment: .leading) { Capsule().fill(ResetTokens.action.opacity(0.94)); Capsule().fill(.white.opacity(0.18)).frame(width: min(geo.size.width, max(64, 64 + offset))); HStack { Image(systemName: "hand.draw.fill"); Text("Sweep to clear the desk"); Spacer(); Image(systemName: "arrow.right") }.font(.headline).foregroundStyle(.white).padding(.horizontal, 20) }.clipShape(Capsule()).contentShape(Capsule()).gesture(DragGesture(minimumDistance: 4).onChanged { value in offset = min(max(0, value.translation.width), geo.size.width - 20) }.onEnded { value in if value.translation.width > geo.size.width * 0.52 { UIImpactFeedbackGenerator(style: .medium).impactOccurred(); withAnimation(.spring(response: 0.25)) { offset = geo.size.width }; action() } else { withAnimation(.spring(response: 0.28)) { offset = 0 } } }).accessibilityElement(children: .combine).accessibilityLabel("Reset desk").accessibilityHint("Sweep right to clear the desk").accessibilityAction { action() } }.frame(height: 58) }
+    var body: some View { GeometryReader { geo in ZStack(alignment: .leading) { Capsule().fill(ResetTokens.action.opacity(0.94)); Capsule().fill(.white.opacity(0.18)).frame(width: min(geo.size.width, max(64, 64 + offset))); HStack { Image(systemName: "hand.draw.fill"); Text("Sweep to clear the desk"); Spacer(); Image(systemName: "arrow.right") }.font(.headline).foregroundStyle(.white).padding(.horizontal, 20) }.clipShape(Capsule()).contentShape(Capsule()).gesture(DragGesture(minimumDistance: 4).onChanged { value in offset = min(max(0, value.translation.width), geo.size.width - 20) }.onEnded { value in if value.translation.width > geo.size.width * 0.52 { withAnimation(.spring(response: 0.25)) { offset = geo.size.width }; action() } else { withAnimation(.spring(response: 0.28)) { offset = 0 } } }).accessibilityElement(children: .combine).accessibilityLabel("Reset desk").accessibilityHint("Sweep right to clear the desk").accessibilityAction { action() } }.frame(height: 58) }
 }
 
 struct DeskScene: View {

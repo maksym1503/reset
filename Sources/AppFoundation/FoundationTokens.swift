@@ -59,7 +59,7 @@ public struct FoundationCard<Content: View>: View {
     }
 }
 
-public enum CompanionMood: Equatable { case sleepy, curious, idle, waking, happy, celebration, calm }
+public enum CompanionMood: Equatable, Sendable { case sleepy, curious, idle, waking, happy, celebration, calm }
 
 public struct CompanionView: View {
     public let mood: CompanionMood
