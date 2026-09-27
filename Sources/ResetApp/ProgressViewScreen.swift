@@ -2,7 +2,7 @@ import SwiftUI
 import ResetFoundation
 import ResetCore
 
-struct ResetProgressView: View {
+@MainActor struct ResetProgressView: View {
     let session: ResetSession
     @Environment(\.colorScheme) private var scheme
     @State private var historyPresented = false
