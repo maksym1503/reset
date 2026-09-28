@@ -11,6 +11,7 @@ public struct WorldPalette {
     public var wall: Color { dark ? hex(tone == .morning ? 0x283B53 : 0x274442) : hex(tone == .morning ? 0xD6E4F2 : 0xD5E6DA) }
     public var ink: Color { dark ? hex(0xF6EEE2) : hex(0x243C4A) }
     public var secondary: Color { dark ? hex(0xC0CFD4) : hex(0x4B626C) }
+    public var floorSecondary: Color { dark ? secondary : hex(0x3F535B) }
     public var accent: Color { dark ? hex(tone == .morning ? 0xA8CAF5 : 0xA3D9BD) : hex(tone == .morning ? 0x345C8D : 0x28614F) }
     public var action: Color { hex(tone == .morning ? 0x345C8D : 0x28614F) }
     public var floor: Color { dark ? hex(0x35404A) : hex(0xDAC5AB) }
@@ -201,5 +202,33 @@ public struct WorldPreviewConfiguration: ViewModifier {
         #else
         content
         #endif
+    }
+}
+
+/// Continues the artboard's floor under supporting copy and earned objects.
+/// The endpoints meet the existing illustration; there is no separate footer surface.
+public struct WorldForeground: View {
+    public let palette: WorldPalette
+    public let sceneHeight: CGFloat
+    public init(palette: WorldPalette, sceneHeight: CGFloat) {
+        self.palette = palette; self.sceneHeight = sceneHeight
+    }
+    public var body: some View {
+        Canvas { context, size in
+            let morning = palette.tone == .morning
+            let start = morning ? -200 : -80
+            let end = morning ? 650 : 480
+            let step = morning ? 74 : 75
+            let horizon: CGFloat = morning ? 263 : 320
+            for x in stride(from: start, through: end, by: step) {
+                let edge = CGFloat(x) * size.width / 400
+                let upper = (CGFloat(x) * (morning ? 0.7 : 0.8) + (morning ? 70 : 40)) * size.width / 400
+                let slope = (edge - upper) / max(1, sceneHeight * (440 - horizon) / 440)
+                var line = Path()
+                line.move(to: CGPoint(x: edge, y: 0))
+                line.addLine(to: CGPoint(x: edge + slope * size.height, y: size.height))
+                context.stroke(line, with: .color(palette.woodEdge.opacity(morning ? 0.17 : 0.15)), lineWidth: size.width / 400)
+            }
+        }.background(palette.floor).accessibilityHidden(true).allowsHitTesting(false)
     }
 }

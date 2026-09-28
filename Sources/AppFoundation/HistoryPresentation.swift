@@ -62,7 +62,7 @@ public struct HistoryCalendar: View {
         let done = completed.contains(key(date))
         let isToday = calendar.isDate(date, inSameDayAs: today)
         let future = date > calendar.startOfDay(for: today)
-        return Button { selected = date; presented = true } label: {
+        return Button { confirm = false; selected = date; presented = true } label: {
             VStack(spacing: 6) {
                 Text(date, format: .dateTime.weekday(.narrow)).font(.caption.weight(.medium))
                 ZStack {
@@ -81,29 +81,47 @@ public struct HistoryCalendar: View {
         let done = completed.contains(key(date))
         let past = date < calendar.startOfDay(for: today)
         let isToday = calendar.isDate(date, inSameDayAs: today)
-        return ScrollView {
-            VStack(spacing: 18) {
-                Text(date, format: .dateTime.weekday(.wide).month(.wide).day()).font(WorldType.title).multilineTextAlignment(.center)
-                Text(done ? completedCopy : isToday ? "Your next small win" : past ? "No completion recorded" : "A day to look forward to")
-                    .font(.headline).multilineTextAlignment(.center)
-                Text(done ? rewardCopy : past ? "Forgot to log it? You can update this day." : isToday ? "Head to Today for your daily ritual." : "Come back when this day arrives.")
-                    .font(.body).foregroundStyle(palette.secondary).multilineTextAlignment(.center)
-                if past {
-                    Button(done ? "Remove completion" : "Add completion", role: done ? .destructive : nil) { confirm = true }
-                        .buttonStyle(.bordered).controlSize(.large).accessibilityIdentifier("history-edit")
-                }
-                Button("Done") { presented = false }.frame(minHeight: 44)
-            }.padding(28).frame(maxWidth: .infinity)
+        return GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 24) {
+                    Spacer(minLength: 8)
+                    Text(date, format: .dateTime.weekday(.wide).month(.wide).day())
+                        .font(WorldType.title).multilineTextAlignment(.center)
+                    ZStack {
+                        VStack(spacing: 12) {
+                            Text(done ? completedCopy : isToday ? "Your next small win" : past ? "No completion recorded" : "A day to look forward to")
+                                .font(.headline)
+                            Text(done ? rewardCopy : past ? "Forgot to log it? You can update this day." : isToday ? "Head to Today for your daily ritual." : "Come back when this day arrives.")
+                                .font(.body).foregroundStyle(palette.secondary)
+                        }.opacity(confirm ? 0 : 1).accessibilityHidden(confirm)
+                        VStack(spacing: 12) {
+                            Text(done ? "Remove this completion?" : "Add this completion?").font(.headline)
+                            Text("Your streak and progress will update. You can change this again later.")
+                                .font(.body).foregroundStyle(palette.secondary)
+                        }.opacity(confirm ? 1 : 0).accessibilityHidden(!confirm)
+                    }.multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 8)
+                    VStack(spacing: 8) {
+                        if past {
+                            Button(done ? "Remove completion" : "Add completion", role: done ? .destructive : nil) {
+                                if confirm {
+                                    do { try edit(date, !done); confirm = false }
+                                    catch { failure = "Your change could not be saved. Please try again." }
+                                } else { confirm = true }
+                            }
+                            .buttonStyle(.bordered).controlSize(.large).accessibilityIdentifier("history-edit")
+                        }
+                        Button(confirm ? "Cancel" : "Done") {
+                            if confirm { confirm = false } else { presented = false }
+                        }.frame(minHeight: 44)
+                    }
+                }.padding(.horizontal, 28).padding(.vertical, 24)
+                    .frame(maxWidth: .infinity, minHeight: geometry.size.height)
+            }
         }
         .foregroundStyle(palette.ink).background(palette.paper).tint(palette.accent)
         .presentationBackground(palette.paper)
         .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
-        .confirmationDialog(done ? "Remove this completion?" : "Add this completion?", isPresented: $confirm, titleVisibility: .visible) {
-            Button(done ? "Remove completion" : "Add completion", role: done ? .destructive : nil) {
-                do { try edit(date, !done) } catch { failure = "Your change could not be saved. Please try again." }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: { Text("Your streak and progress will update. You can change this again later.") }
         .alert("Couldn’t save", isPresented: Binding(get: { failure != nil }, set: { if !$0 { failure = nil } })) {
             Button("OK", role: .cancel) {}
         } message: { Text(failure ?? "") }
@@ -152,8 +170,9 @@ public struct UnlockGallery: View {
     }
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("A little more yours").font(WorldType.title)
-            Text("Small rituals add up. Tap an object to explore.").font(.subheadline).foregroundStyle(palette.secondary)
+            Text(nextUnlock.map { "Next up: \(titles[$0])" } ?? "Look what you’ve made room for.").font(WorldType.title)
+            Text(nextDescription)
+                .font(.subheadline).foregroundStyle(palette.floorSecondary).fixedSize(horizontal: false, vertical: true)
             if textSize.isAccessibilitySize {
                 VStack(alignment: .leading, spacing: 18) { objects }
             } else {
@@ -168,13 +187,20 @@ public struct UnlockGallery: View {
             }
         }
     }
+    private var nextUnlock: Int? { thresholds.indices.first { total < thresholds[$0] } }
+    private var nextDescription: String {
+        guard let i = nextUnlock else { return "Every detail here grew from your daily ritual." }
+        let remaining = thresholds[i] - total
+        let unit = palette.tone == .morning ? (remaining == 1 ? "morning" : "mornings") : (remaining == 1 ? "reset" : "resets")
+        return "\(remaining) more \(unit) to bring it home. Any days count."
+    }
     private var objects: some View {
         ForEach(Array(thresholds.indices), id: \.self) { i in
             Button { selection = i } label: {
                 VStack(spacing: 5) {
-                    RewardObject(index: i, palette: palette).frame(height: 100).opacity(total >= thresholds[i] ? 1 : 0.5)
+                    RewardObject(index: i, palette: palette).frame(height: 100).opacity(total >= thresholds[i] || nextUnlock == i ? 1 : 0.6)
                     Text(titles[i]).font(.subheadline.weight(.semibold)).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
-                    Text(total >= thresholds[i] ? "Yours" : "\(total)/\(thresholds[i]) days").font(.caption).foregroundStyle(palette.secondary)
+                    Text(total >= thresholds[i] ? "At home" : nextUnlock == i ? "Next · \(total)/\(thresholds[i])" : "At \(thresholds[i]) days").font(.caption).foregroundStyle(palette.floorSecondary)
                 }.frame(minWidth: 86, maxWidth: .infinity).contentShape(Rectangle())
             }.buttonStyle(.plain).foregroundStyle(palette.ink)
             .accessibilityLabel("\(titles[i]), \(total >= thresholds[i] ? "unlocked" : "unlocks at \(thresholds[i]) completions")")
