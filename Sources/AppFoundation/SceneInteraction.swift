@@ -60,11 +60,23 @@ public struct SceneInteraction<Art: View>: View {
                     .position(x: g.size.width * companionPoint.x, y: g.size.height * companionPoint.y)
                     .accessibilityLabel("Mochi").accessibilityHint("Say hello").accessibilityIdentifier("mochi")
                 if !completed {
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 20, weight: .bold)).foregroundStyle(.white)
-                        .shadow(color: palette.action, radius: 3)
-                        .position(x: g.size.width * (target.midX + 0.06 * amount), y: g.size.height * (target.midY + 0.04))
-                        .allowsHitTesting(false).accessibilityHidden(true)
+                    VStack(spacing: 4) {
+                        Text(palette.tone == .morning ? "Pull duvet" : "Sweep desk")
+                            .font(.caption.weight(.semibold))
+                        HStack(spacing: 7) {
+                            Image(systemName: "line.3.horizontal").font(.caption.weight(.bold)).rotationEffect(.degrees(90))
+                            Path { path in path.move(to: .zero); path.addLine(to: CGPoint(x: 42, y: 0)) }
+                                .stroke(style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [2, 5]))
+                                .frame(width: 42, height: 1)
+                            Image(systemName: "arrow.right").font(.caption.weight(.bold))
+                        }
+                    }
+                    .foregroundStyle(palette.tone == .morning ? Color.white : palette.action)
+                    .shadow(color: palette.tone == .morning ? .black.opacity(0.55) : palette.cream, radius: 2, y: 1)
+                    .opacity(max(0, 1 - Double(amount) * 5))
+                    .position(x: g.size.width * (palette.tone == .morning ? 0.51 : 0.62),
+                              y: g.size.height * (palette.tone == .morning ? 0.735 : 0.655))
+                    .allowsHitTesting(false).accessibilityHidden(true)
                 }
                 if reward {
                     Text("Lovely. That’s today done.")

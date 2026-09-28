@@ -8,10 +8,11 @@ struct ResetToday: View {
     private var p: WorldPalette { WorldPalette(.focus, scheme) }
     var body: some View {
         GeometryReader { geometry in
+            let sceneHeight = max(360, min(560, geometry.size.height - 237))
             RitualScrollView(completed: session.completed, action: { session.perform { try $0.complete() } }) { progress in
                 VStack(spacing: 0) {
                     WorldHeader("Make a little space.", subtitle: Date().formatted(.dateTime.weekday(.wide).month(.abbreviated).day()), palette: p)
-                        .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal,24).padding(.top,16).padding(.bottom,12)
+                        .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal,24).padding(.top,16).padding(.bottom,12).background(p.wall)
                     SceneInteraction(completed: session.completed, progress: progress, label: "Reset desk",
                         hint: "Sweep the desktop to the right. Or double tap to complete.",
                         palette: p, companionPoint: UnitPoint(x: 0.22,y: 0.73),
@@ -19,24 +20,29 @@ struct ResetToday: View {
                         action: { session.perform { try $0.complete() } }) { progress in
                             WorkspaceArtwork(progress: progress, level: session.progress.level, palette: p)
                         }
-                        .frame(height: max(360,min(560,geometry.size.height - 237)))
-                    VStack(spacing: 9) {
-                        Text(session.completed ? "Clear desk. Fresh perspective." : "A little less clutter.")
-                            .font(WorldType.title).multilineTextAlignment(.center)
-                        Text(session.completed ? "Today’s reset is saved. Enjoy the space." : "Clear your desk, then sweep right to log your reset.")
-                            .font(.subheadline).foregroundStyle(p.secondary).multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                        if session.completed {
-                            Button("Undo today’s reset", role: .destructive) { session.perform { try $0.undoToday() } }
-                                .font(.subheadline).frame(minHeight: 44)
-                        } else {
-                            Text("Mochi will take care of the finishing touches.")
-                                .font(.caption).foregroundStyle(p.secondary).padding(.top,6)
-                        }
-                    }.padding(.horizontal,26).padding(.vertical,18)
-                    Spacer(minLength: 0)
+                        .frame(height: sceneHeight)
+                    VStack(spacing: 0) {
+                        VStack(spacing: 9) {
+                            Text(session.completed ? "Clear desk. Fresh perspective." : "Clear a little space.")
+                                .font(WorldType.title).multilineTextAlignment(.center)
+                            Text(session.completed ? "Today’s reset is saved. Enjoy the space." : "Desk clear? Sweep right to save today’s reset.")
+                                .font(.subheadline).foregroundStyle(p.floorSecondary).multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if session.completed {
+                                Button("Undo today’s reset", role: .destructive) { session.perform { try $0.undoToday() } }
+                                    .font(.subheadline).frame(minHeight: 44)
+                            } else {
+                                Text("Mochi will take care of the finishing touches.")
+                                    .font(.caption).foregroundStyle(p.floorSecondary).padding(.top,6)
+                            }
+                        }.padding(.horizontal,26).padding(.vertical,18)
+                        Spacer(minLength: 0)
+                    }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(WorldForeground(palette: p, sceneHeight: sceneHeight))
                 }.frame(minHeight: geometry.size.height, alignment: .top)
-            }.clipped().background(p.paper)
+            }.clipped().background {
+                VStack(spacing: 0) { p.wall; p.floor }.ignoresSafeArea()
+            }
         }.foregroundStyle(p.ink).tint(p.accent)
     }
 }
