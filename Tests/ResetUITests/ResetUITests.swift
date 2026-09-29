@@ -147,9 +147,12 @@ final class ResetUITests: XCTestCase {
         capture("today-reward-detail")
         app.buttons["Done"].tap()
         app.tabBars.buttons["Progress"].tap()
+        capture("progress-overview")
         app.swipeUp()
         app.buttons["mochi-progress"].tap()
         capture("progress-mochi")
+        app.swipeUp()
+        capture("reward-path")
         app.buttons["next-reward"].tap()
         capture("next-unlock-detail")
         app.buttons["Done"].tap()
@@ -163,6 +166,54 @@ final class ResetUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Window garden"].exists)
         capture("window-garden-detail")
         app.buttons["Done"].tap()
+    }
+
+    @MainActor func testRewardMilestoneAndProgressPath() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-skip-onboarding", "-qa-light"]
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons["Settings"].waitForExistence(timeout: 15))
+        app.tabBars.buttons["Settings"].tap()
+        app.buttons["Reset progress"].tap()
+        app.buttons["Delete"].tap()
+        app.tabBars.buttons["Progress"].tap()
+        app.buttons["history-expand"].tap()
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .current
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        for offset in 1...4 {
+            let date = calendar.date(byAdding: .day, value: -offset, to: Date())!
+            app.buttons[formatter.string(from: date)].tap()
+            let edit = app.buttons["history-edit"]
+            XCTAssertTrue(edit.waitForExistence(timeout: 5))
+            edit.tap()
+            edit.tap()
+            app.buttons["Done"].tap()
+        }
+
+        app.tabBars.buttons["Today"].tap()
+        let ritual = app.buttons["ritual-object"]
+        XCTAssertTrue(ritual.waitForExistence(timeout: 5))
+        let start = ritual.coordinate(withNormalizedOffset: CGVector(dx: 0.12, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: ritual.coordinate(withNormalizedOffset: CGVector(dx: 0.94, dy: 0.5)))
+        XCTAssertTrue(app.staticTexts["Desk plant unlocked!"].waitForExistence(timeout: 5))
+        capture("milestone-unlocked")
+
+        app.tabBars.buttons["Progress"].tap()
+        XCTAssertTrue(app.staticTexts["reward-collection-count"].waitForExistence(timeout: 5))
+        app.swipeUp()
+        app.swipeUp()
+        capture("reward-progression-path")
+        XCTAssertTrue(app.buttons["milestone-0"].label.contains("unlocked"))
+        XCTAssertTrue(app.buttons["milestone-1"].label.contains("unlocks at 10"))
+        let collection = app.scrollViews.containing(.button, identifier: "milestone-4").matching(identifier: "reward-collection").firstMatch
+        collection.swipeLeft()
+        XCTAssertTrue(app.buttons["milestone-4"].isHittable)
+        capture("later-reward-path")
     }
 
     @MainActor private func capture(_ name: String) {

@@ -42,7 +42,7 @@ import ResetCore
                     WindowAtmosphere(palette: p, active: !historyPresented && !rewardPresented)
                     CompanionGreeting(palette: p, active: !historyPresented && !rewardPresented)
                         .frame(width: 100,height: 107).padding(.trailing,16).padding(.bottom,18)
-                }.aspectRatio(400.0 / 440.0, contentMode: .fit).accessibilityLabel("Your workspace at level \(session.progress.level)")
+                }.aspectRatio(400.0 / 320.0, contentMode: .fit).accessibilityLabel("Your workspace at level \(session.progress.level)")
                 VStack(alignment: .leading, spacing: 22) {
                     UnlockGallery(total: session.progress.total, thresholds: WorldRewards.thresholds,
                         titles: WorldRewards.titles(p.tone), palette: p, onPresentationChange: { rewardPresented = $0 })

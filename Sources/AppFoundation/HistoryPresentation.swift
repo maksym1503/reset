@@ -197,6 +197,12 @@ public enum WorldRewards {
         tone == .morning ? ["A green friend", "Wall print", "Reading corner", "Woven throw", "Window garden"]
                         : ["Desk plant", "Studio print", "Bookshelf", "Daybook", "Window garden"]
     }
+
+    public static func achievement(total: Int, tone: WorldTone) -> String? {
+        if total == 7 { return "First seven, yours!" }
+        guard let index = thresholds.firstIndex(of: total) else { return nil }
+        return "\(titles(tone)[index]) unlocked!"
+    }
 }
 
 @MainActor public struct UnlockGallery: View {
@@ -218,14 +224,24 @@ public enum WorldRewards {
                 HStack(spacing: 16) { featuredArt; featuredCopy }
                 VStack(alignment: .leading, spacing: 8) { featuredArt; featuredCopy }
             }
-            Text("Your collection").font(.headline)
+            HStack(alignment: .firstTextBaseline) {
+                Text(palette.tone == .morning ? "Room upgrades" : "Workspace upgrades").font(.headline)
+                Spacer(minLength: 8)
+                Text("\(unlockedCount) of \(thresholds.count) collected")
+                    .font(.caption.weight(.medium)).foregroundStyle(palette.floorSecondary)
+                    .accessibilityIdentifier("reward-collection-count")
+            }
             if textSize.isAccessibilitySize {
                 VStack(spacing: 20) { objects }
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .top, spacing: 20) { objects }
-                        .padding(.vertical, 4)
-                }.accessibilityIdentifier("reward-collection")
+                    HStack(alignment: .top, spacing: 0) { objects }
+                        .scrollTargetLayout()
+                        .padding(.vertical, 8)
+                }
+                .contentMargins(.horizontal, 16, for: .scrollContent)
+                .scrollTargetBehavior(.viewAligned)
+                .accessibilityIdentifier("reward-collection")
             }
         }
         .sheet(isPresented: Binding(get: { selection != nil }, set: { if !$0 { selection = nil } })) {
@@ -236,6 +252,7 @@ public enum WorldRewards {
         .onChange(of: selection) { _, value in onPresentationChange(value != nil) }
         .sensoryFeedback(.selection, trigger: selection)
     }
+    private var unlockedCount: Int { thresholds.filter { total >= $0 }.count }
     private var featuredArt: some View {
         Button { selection = next } label: {
             RewardObject(index: next, palette: palette).frame(width: 105, height: 132)
@@ -258,17 +275,66 @@ public enum WorldRewards {
     private var objects: some View {
         ForEach(Array(thresholds.indices), id: \.self) { i in
             Button { selection = i } label: {
-                VStack(spacing: 5) {
-                    RewardObject(index: i, palette: palette).frame(width: 94, height: 104)
-                    Text(titles[i]).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
-                    Text(total >= thresholds[i] ? "At home" : "\(thresholds[i]) days")
-                        .font(.caption.weight(.medium)).foregroundStyle(palette.floorSecondary)
-                }.multilineTextAlignment(.center).frame(width: textSize.isAccessibilitySize ? 230 : 108)
-                    .contentShape(Rectangle())
+                rewardNode(i)
             }.buttonStyle(CompanionPressStyle()).foregroundStyle(palette.ink)
                 .accessibilityLabel("\(titles[i]), \(total >= thresholds[i] ? "unlocked" : "unlocks at \(thresholds[i]) completions")")
                 .accessibilityIdentifier("milestone-\(i)")
         }
+    }
+    private func rewardNode(_ index: Int) -> some View {
+        let earned = total >= thresholds[index]
+        let isNext = index == next && !earned
+        let previousEarned = index > 0 && total >= thresholds[index - 1]
+        let currentEarned = earned
+        return VStack(spacing: 7) {
+            RewardObject(index: index, palette: palette)
+                .frame(width: 94, height: 96)
+                .saturation(earned || isNext ? 1 : 0.35)
+                .opacity(earned || isNext ? 1 : 0.58)
+                .background {
+                    if isNext {
+                        Circle().fill(palette.accent.opacity(palette.dark ? 0.22 : 0.12))
+                            .frame(width: 86, height: 86)
+                    }
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    if !earned && !isNext {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(palette.paper)
+                            .padding(6)
+                            .background(Circle().fill(palette.floorSecondary))
+                            .offset(x: -3, y: -2)
+                    }
+                }
+            ZStack {
+                HStack(spacing: 0) {
+                    Rectangle().fill(index == 0 ? Color.clear : (previousEarned ? palette.accent : palette.floorSecondary.opacity(0.3)))
+                    Rectangle().fill(currentEarned ? palette.accent : palette.floorSecondary.opacity(0.3))
+                }.frame(height: 2)
+                Circle().fill(earned ? palette.accent : palette.paper)
+                    .overlay(Circle().stroke(earned || isNext ? palette.accent : palette.floorSecondary.opacity(0.5), lineWidth: isNext ? 2 : 1.5))
+                    .frame(width: isNext ? 13 : 10, height: isNext ? 13 : 10)
+                    .shadow(color: isNext ? palette.accent.opacity(0.35) : .clear, radius: 6)
+            }.frame(height: 12)
+            Text(titles[index]).font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true).lineLimit(2)
+            Text(nodeStatus(index, earned: earned, isNext: isNext))
+                .font(.caption.weight(isNext ? .bold : .medium))
+                .foregroundStyle(earned ? palette.accent : palette.floorSecondary)
+                .fixedSize(horizontal: false, vertical: true).lineLimit(2)
+        }
+        .multilineTextAlignment(.center)
+        .frame(width: textSize.isAccessibilitySize ? 230 : 112)
+        .contentShape(Rectangle())
+        .animation(.spring(response: 0.42, dampingFraction: 0.76), value: total)
+    }
+    private func nodeStatus(_ index: Int, earned: Bool, isNext: Bool) -> String {
+        if earned { return "Collected" }
+        if isNext { return "Next · \(max(0, thresholds[index] - total)) to go" }
+        let remaining = thresholds[index] - total
+        let unit = palette.tone == .morning ? (remaining == 1 ? "morning" : "mornings") : (remaining == 1 ? "reset" : "resets")
+        return "\(remaining) \(unit) away"
     }
 }
 

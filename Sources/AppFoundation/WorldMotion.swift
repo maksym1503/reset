@@ -121,3 +121,60 @@ private struct BurstDrawing: View, Animatable {
         }
     }
 }
+
+/// A short, larger reward beat used only when a challenge or workspace item is earned.
+struct MilestoneMoment: View {
+    let title: String
+    let palette: WorldPalette
+    let reduceMotion: Bool
+    @State private var flight: CGFloat = 0
+    @State private var ringScale: CGFloat = 0.55
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Circle()
+                    .fill(palette.gold.opacity(0.18))
+                    .frame(width: 210, height: 210)
+                    .blur(radius: 42)
+                    .offset(y: -8)
+                Circle()
+                    .stroke(palette.gold.opacity(reduceMotion ? 0.35 : Double(1 - flight) * 0.45), lineWidth: 2)
+                    .frame(width: 112, height: 112)
+                    .scaleEffect(ringScale)
+                ForEach(0..<14, id: \.self) { index in
+                    let angle = Double(index) * Double.pi * 2 / 14
+                    let distance = CGFloat(index.isMultiple(of: 2) ? 82 : 66) * (reduceMotion ? 0.82 : flight)
+                    Circle()
+                        .fill(index.isMultiple(of: 3) ? palette.gold : palette.accent)
+                        .frame(width: index.isMultiple(of: 3) ? 6 : 4, height: index.isMultiple(of: 3) ? 6 : 4)
+                        .offset(x: CGFloat(cos(angle)) * distance, y: CGFloat(sin(angle)) * distance)
+                        .opacity(reduceMotion ? 0.72 : Double(1 - flight * 0.58) * 0.9)
+                }
+                VStack(spacing: 5) {
+                    Text("MILESTONE")
+                        .font(.caption.weight(.heavy)).tracking(1.8)
+                        .foregroundStyle(palette.accent)
+                    Text(title)
+                        .font(WorldType.title.weight(.bold))
+                        .foregroundStyle(palette.ink)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .shadow(color: palette.paper.opacity(0.8), radius: 10)
+                        .accessibilityIdentifier("milestone-celebration-title")
+                }
+                .padding(.horizontal, 28)
+                .frame(maxWidth: min(geometry.size.width - 24, 360))
+                .offset(y: -geometry.size.height * 0.12)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .allowsHitTesting(false)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Milestone unlocked. \(title)")
+        }
+        .onAppear {
+            guard !reduceMotion else { flight = 0.5; ringScale = 1; return }
+            withAnimation(.easeOut(duration: 1.15)) { flight = 1; ringScale = 1.15 }
+        }
+    }
+}
