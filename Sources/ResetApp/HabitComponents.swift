@@ -113,6 +113,19 @@ struct WorkspaceArtwork: View, Animatable {
             a.books(31,208,p)
             a.books(43,190,p)
         }
+        if level >= 5 {
+            a.round(295,271,50,28,3,p.action)
+            a.round(300,274,42,22,2,p.cream)
+            a.line([331,273,331,297],p.gold,2)
+        }
+        if level >= 7 {
+            a.round(254,144,84,13,3,p.wood)
+            for x: CGFloat in [267,295,323] {
+                a.line([x,145,x,122],p.leaf,2)
+                a.leaf(x,138,-10,-12,p.leaf); a.leaf(x,131,10,-12,p.leaf)
+                a.oval(x-4,117,8,8,p.gold)
+            }
+        }
         // Canvas tote beneath the desk explains the otherwise empty foreground.
         a.round(271,373,51,48,8,p.cream)
         a.context.stroke(Path(roundedRect: CGRect(x: 282,y: 359,width: 27,height: 28),cornerRadius: 10),with: .color(p.cream),lineWidth: 5)

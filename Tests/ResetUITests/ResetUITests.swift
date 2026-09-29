@@ -65,7 +65,7 @@ final class ResetUITests: XCTestCase {
         capture("progress-rewards")
         app.buttons["milestone-0"].tap()
         capture("milestone-detail")
-        app.buttons["Lovely"].tap()
+        app.buttons["Done"].tap()
         app.tabBars.buttons["Today"].tap()
         app.buttons["Undo today’s reset"].tap()
         XCTAssertFalse(app.staticTexts["Clear desk. Fresh perspective."].exists)
@@ -132,8 +132,37 @@ final class ResetUITests: XCTestCase {
         let start = surface.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0,dy: -260)))
         app.scrollViews.firstMatch.swipeUp()
-        XCTAssertTrue(app.staticTexts["Mochi will take care of the finishing touches."].isHittable)
+        XCTAssertTrue(app.staticTexts["today-next-unlock"].isHittable)
         capture("accessibility-scrolled-instruction")
+    }
+
+    @MainActor func testRewardPreviewAndMochi() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-skip-onboarding", "-qa-light"]
+        app.launch()
+        XCTAssertTrue(app.buttons["ritual-object"].waitForExistence(timeout: 15))
+        app.buttons["mochi"].press(forDuration: 0.5)
+        capture("mochi-touch")
+        app.buttons["today-reward-preview"].tap()
+        capture("today-reward-detail")
+        app.buttons["Done"].tap()
+        app.tabBars.buttons["Progress"].tap()
+        app.swipeUp()
+        app.buttons["mochi-progress"].tap()
+        capture("progress-mochi")
+        app.buttons["next-reward"].tap()
+        capture("next-unlock-detail")
+        app.buttons["Done"].tap()
+        // Browse the collection to the last new object, not just the first preview.
+        let collection = app.scrollViews.containing(.button, identifier: "milestone-4").matching(identifier: "reward-collection").firstMatch
+        collection.swipeLeft()
+        collection.swipeLeft()
+        XCTAssertTrue(app.buttons["milestone-4"].isHittable)
+        capture("later-rewards")
+        app.buttons["milestone-4"].tap()
+        XCTAssertTrue(app.staticTexts["Window garden"].exists)
+        capture("window-garden-detail")
+        app.buttons["Done"].tap()
     }
 
     @MainActor private func capture(_ name: String) {
