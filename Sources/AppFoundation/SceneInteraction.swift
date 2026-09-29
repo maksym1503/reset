@@ -11,6 +11,7 @@ public struct SceneInteraction<Art: View>: View {
     public let target: CGRect
     public let restingMood: CompanionMood
     public let active: Bool
+    public let achievement: String?
     public let action: () -> Void
     public let art: (CGFloat) -> Art
     @State private var reaction: CompanionMood?
@@ -23,10 +24,11 @@ public struct SceneInteraction<Art: View>: View {
     @Environment(\.scenePhase) private var phase
     public init(completed: Bool, progress: CGFloat = 0, label: String, hint: String, palette: WorldPalette,
                 companionPoint: UnitPoint, target: CGRect, restingMood: CompanionMood, active: Bool = true,
+                achievement: String? = nil,
                 action: @escaping () -> Void, @ViewBuilder art: @escaping (CGFloat) -> Art) {
         self.completed = completed; self.progress = progress; self.label = label; self.hint = hint; self.palette = palette
         self.companionPoint = companionPoint; self.target = target; self.restingMood = restingMood
-        self.active = active; self.action = action; self.art = art
+        self.active = active; self.achievement = achievement; self.action = action; self.art = art
     }
     private var amount: CGFloat {
         #if DEBUG
@@ -64,7 +66,7 @@ public struct SceneInteraction<Art: View>: View {
                     .accessibilityAction { if !completed { action() } }
                     .position(x: g.size.width * target.midX, y: g.size.height * target.midY)
                 Button { taps += 1; reaction = completed ? (taps.isMultiple(of: 2) ? .proud : .celebration) : (taps.isMultiple(of: 2) ? .waking : .curious) } label: {
-                    CompanionView(mood: progress > 0 || amount > 0 && !completed ? .helping : reaction ?? (completed ? .calm : restingMood),
+                    CompanionView(mood: achievement != nil ? .celebration : progress > 0 || amount > 0 && !completed ? .helping : reaction ?? (completed ? .calm : restingMood),
                                   accent: palette.accent, active: active)
                         .frame(width: g.size.width * 0.29, height: g.size.width * 0.32)
                 }.buttonStyle(CompanionPressStyle())
@@ -94,16 +96,23 @@ public struct SceneInteraction<Art: View>: View {
                     .allowsHitTesting(false).accessibilityHidden(true)
                 }
                 if reward {
-                    CompletionBloom(palette: palette, reduceMotion: reduceMotion)
-                        .frame(width: g.size.width * 0.8, height: g.size.height * 0.48)
-                        .position(x: g.size.width * 0.53, y: g.size.height * 0.61)
-                        .allowsHitTesting(false).accessibilityHidden(true)
-                    Text(palette.tone == .morning ? "A bright start!" : "And… exhale.")
-                        .font(WorldType.title).foregroundStyle(palette.ink)
-                        .multilineTextAlignment(.center).padding(.horizontal, 24)
-                        .position(x: g.size.width / 2, y: g.size.height * 0.42)
-                        .transition(.opacity)
-                        .accessibilityIdentifier("completion-reward")
+                    if let achievement {
+                        MilestoneMoment(title: achievement, palette: palette, reduceMotion: reduceMotion)
+                            .frame(width: g.size.width, height: g.size.height)
+                            .transition(.opacity)
+                            .accessibilityIdentifier("milestone-celebration")
+                    } else {
+                        CompletionBloom(palette: palette, reduceMotion: reduceMotion)
+                            .frame(width: g.size.width * 0.8, height: g.size.height * 0.48)
+                            .position(x: g.size.width * 0.53, y: g.size.height * 0.61)
+                            .allowsHitTesting(false).accessibilityHidden(true)
+                        Text(palette.tone == .morning ? "A bright start!" : "And… exhale.")
+                            .font(WorldType.title).foregroundStyle(palette.ink)
+                            .multilineTextAlignment(.center).padding(.horizontal, 24)
+                            .position(x: g.size.width / 2, y: g.size.height * 0.42)
+                            .transition(.opacity)
+                            .accessibilityIdentifier("completion-reward")
+                    }
                 }
             }
         }

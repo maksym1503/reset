@@ -4,6 +4,7 @@ import ResetCore
 
 struct ResetToday: View {
     @State private var rewardPresented = false
+    @State private var achievementTitle: String?
     let session: ResetSession
     @Environment(\.colorScheme) private var scheme
     private var p: WorldPalette { WorldPalette(.focus, scheme) }
@@ -18,6 +19,7 @@ struct ResetToday: View {
                         hint: "Sweep the desktop to the right. Or double tap to complete.",
                         palette: p, companionPoint: UnitPoint(x: 0.22,y: 0.73),
                         target: CGRect(x: 0.29,y: 0.60,width: 0.64,height: 0.16), restingMood: .curious, active: !rewardPresented,
+                        achievement: achievementTitle,
                         action: { session.perform { try $0.complete() } }) { progress in
                             WorkspaceArtwork(progress: progress, level: session.progress.level, palette: p)
                         }
@@ -30,7 +32,16 @@ struct ResetToday: View {
                     }.frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(WorldForeground(palette: p, sceneHeight: sceneHeight))
                 }.frame(minHeight: geometry.size.height, alignment: .top)
-            }.clipped().background {
+            }
+            .onChange(of: session.progress.total) { oldTotal, newTotal in
+                guard newTotal > oldTotal else { achievementTitle = nil; return }
+                achievementTitle = WorldRewards.achievement(total: newTotal, tone: p.tone)
+            }
+            .task(id: achievementTitle) {
+                guard achievementTitle != nil else { return }
+                do { try await Task.sleep(for: .seconds(3.4)); achievementTitle = nil } catch {}
+            }
+            .clipped().background {
                 VStack(spacing: 0) { p.wall; p.floor }.ignoresSafeArea()
             }
         }.foregroundStyle(p.ink).tint(p.accent)
