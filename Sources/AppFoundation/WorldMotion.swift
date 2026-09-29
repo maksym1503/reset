@@ -97,18 +97,27 @@ private struct BurstDrawing: View, Animatable {
     let palette: WorldPalette
     var animatableData: CGFloat { get { flight } set { flight = newValue } }
     var body: some View {
-        Canvas { c, size in
-            for i in 0..<12 {
-                let angle = Double(i) * .pi / 6
-                let radius = (0.12 + flight * 0.4) * min(size.width, size.height)
-                let x = size.width / 2 + cos(angle) * radius
-                let y = size.height / 2 + sin(angle) * radius - flight * 25
-                var ray = Path()
-                ray.move(to: CGPoint(x: x, y: y))
-                ray.addLine(to: CGPoint(x: x + cos(angle) * 9, y: y + sin(angle) * 9))
-                c.stroke(ray, with: .color((i.isMultiple(of: 2) ? palette.gold : palette.cream)
-                    .opacity(Double(1 - flight))), style: StrokeStyle(lineWidth: 3, lineCap: .round))
-            }
+        Canvas { context, size in
+            drawRays(in: context, size: size)
+        }
+    }
+
+    private func drawRays(in context: GraphicsContext, size: CGSize) {
+        let radius: CGFloat = (0.12 + flight * 0.4) * min(size.width, size.height)
+        let opacity: Double = 1 - Double(flight)
+        let stroke = StrokeStyle(lineWidth: 3, lineCap: .round)
+        for index in 0..<12 {
+            let angle: Double = Double(index) * Double.pi / 6
+            let dx = CGFloat(cos(angle))
+            let dy = CGFloat(sin(angle))
+            let origin = CGPoint(x: size.width / 2 + dx * radius,
+                                 y: size.height / 2 + dy * radius - flight * 25)
+            let end = CGPoint(x: origin.x + dx * 9, y: origin.y + dy * 9)
+            var ray = Path()
+            ray.move(to: origin)
+            ray.addLine(to: end)
+            let color: Color = index.isMultiple(of: 2) ? palette.gold : palette.cream
+            context.stroke(ray, with: .color(color.opacity(opacity)), style: stroke)
         }
     }
 }
