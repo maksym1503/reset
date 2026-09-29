@@ -91,6 +91,8 @@ public struct Illustration {
     }
 }
 
+private struct CompanionMotion { var lift: Double = 0; var turn: Double = 0 }
+
 public enum CompanionMood: Equatable, Sendable {
     case sleepy, curious, idle, waking, happy, celebration, calm, helping, proud
 }
@@ -158,9 +160,22 @@ public struct CompanionView: View {
                 a.line([114,119,137,119],face,2)
             }
         }
+        .aspectRatio(150.0 / 160.0, contentMode: .fit)
         .rotationEffect(.degrees(reduceMotion ? 0 : mood == .curious ? -7 : mood == .sleepy ? 5 : stretch ? -3 : 0))
         .offset(y: reduceMotion ? 0 : mood == .celebration ? -9 : 0)
-        .animation(reduceMotion ? nil : .spring(response: 0.36, dampingFraction: 0.7), value: mood)
+        .keyframeAnimator(initialValue: CompanionMotion(), trigger: mood) { [reduceMotion, active] view, motion in
+            view.offset(y: reduceMotion || !active ? 0 : motion.lift)
+                .rotationEffect(.degrees(reduceMotion || !active ? 0 : motion.turn))
+        } keyframes: { _ in
+            KeyframeTrack(\.lift) {
+                CubicKeyframe(mood == .celebration ? -15 : mood == .waking ? -5 : 0, duration: 0.22)
+                SpringKeyframe(0, duration: 0.5, spring: .smooth)
+            }
+            KeyframeTrack(\.turn) {
+                CubicKeyframe(mood == .curious ? 6 : mood == .proud ? -4 : 0, duration: 0.2)
+                SpringKeyframe(0, duration: 0.5, spring: .smooth)
+            }
+        }
         .animation(reduceMotion ? nil : .spring(response: 0.6), value: stretch)
         .onAppear { visible = true }
         .onDisappear { visible = false }

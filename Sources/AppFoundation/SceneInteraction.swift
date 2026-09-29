@@ -16,6 +16,9 @@ public struct SceneInteraction<Art: View>: View {
     @State private var reaction: CompanionMood?
     @State private var taps = 0
     @State private var reward = false
+    @State private var cueTravel: CGFloat = 0
+    @State private var visible = false
+    private var cueRunning: Bool { visible && active && phase == .active && !reduceMotion && !completed && progress == 0 }
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var phase
     public init(completed: Bool, progress: CGFloat = 0, label: String, hint: String, palette: WorldPalette,
@@ -31,11 +34,20 @@ public struct SceneInteraction<Art: View>: View {
         #endif
         return completed ? 1 : progress
     }
+    private var directionCue: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "hand.draw.fill").font(.system(size: 20, weight: .medium))
+                .offset(x: cueTravel)
+            Image(systemName: "arrow.right").font(.system(size: 22, weight: .semibold))
+        }.frame(width: 90, height: 26)
+    }
+
     public var body: some View {
         GeometryReader { g in
             ZStack {
                 art(amount)
                     .animation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.82), value: completed)
+                WindowAtmosphere(palette: palette, active: active && !reward)
                 Color.clear.contentShape(Rectangle())
                     .frame(width: g.size.width * target.width, height: g.size.height * target.height)
                     .background {
@@ -55,40 +67,60 @@ public struct SceneInteraction<Art: View>: View {
                     CompanionView(mood: progress > 0 || amount > 0 && !completed ? .helping : reaction ?? (completed ? .calm : restingMood),
                                   accent: palette.accent, active: active)
                         .frame(width: g.size.width * 0.29, height: g.size.width * 0.32)
-                }.buttonStyle(.plain)
+                }.buttonStyle(CompanionPressStyle())
                     .offset(x: (companionPoint.x > 0.5 ? -1 : 1) * g.size.width * (completed ? 0 : amount) * 0.07)
                     .position(x: g.size.width * companionPoint.x, y: g.size.height * companionPoint.y)
                     .accessibilityLabel("Mochi").accessibilityHint("Say hello").accessibilityIdentifier("mochi")
                 if !completed {
-                    VStack(spacing: 4) {
-                        Text(palette.tone == .morning ? "Pull duvet" : "Sweep desk")
-                            .font(.caption.weight(.semibold))
-                        HStack(spacing: 7) {
-                            Image(systemName: "line.3.horizontal").font(.caption.weight(.bold)).rotationEffect(.degrees(90))
-                            Path { path in path.move(to: .zero); path.addLine(to: CGPoint(x: 42, y: 0)) }
-                                .stroke(style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [2, 5]))
-                                .frame(width: 42, height: 1)
-                            Image(systemName: "arrow.right").font(.caption.weight(.bold))
+                    Group {
+                        if palette.tone == .morning {
+                            VStack(spacing: 5) {
+                                Text("Pull to finish").font(.subheadline.weight(.bold))
+                                directionCue
+                            }
+                        } else {
+                            HStack(spacing: 12) {
+                                Text("Sweep").font(.subheadline.weight(.bold))
+                                directionCue
+                            }
                         }
                     }
-                    .foregroundStyle(palette.tone == .morning ? Color.white : palette.action)
-                    .shadow(color: palette.tone == .morning ? .black.opacity(0.55) : palette.cream, radius: 2, y: 1)
-                    .opacity(max(0, 1 - Double(amount) * 5))
-                    .position(x: g.size.width * (palette.tone == .morning ? 0.51 : 0.62),
-                              y: g.size.height * (palette.tone == .morning ? 0.735 : 0.655))
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    .foregroundStyle(Color.white)
+                    .shadow(color: .black.opacity(0.4), radius: 2, y: 1)
+                    .opacity(max(0, 1 - Double(amount) * 6))
+                    .position(x: g.size.width * (palette.tone == .morning ? 0.51 : 0.60),
+                              y: g.size.height * (palette.tone == .morning ? 0.74 : 0.73))
                     .allowsHitTesting(false).accessibilityHidden(true)
                 }
                 if reward {
-                    Text("Lovely. That’s today done.")
-                        .font(.headline).foregroundStyle(palette.ink)
-                        .padding(.horizontal,16).padding(.vertical,10)
-                        .frame(maxWidth: g.size.width - 40)
-                        .multilineTextAlignment(.center)
-                        .background(.regularMaterial, in: Capsule())
-                        .position(x: g.size.width / 2, y: g.size.height * 0.13)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    CompletionBloom(palette: palette, reduceMotion: reduceMotion)
+                        .frame(width: g.size.width * 0.8, height: g.size.height * 0.48)
+                        .position(x: g.size.width * 0.53, y: g.size.height * 0.61)
+                        .allowsHitTesting(false).accessibilityHidden(true)
+                    Text(palette.tone == .morning ? "A bright start!" : "And… exhale.")
+                        .font(WorldType.title).foregroundStyle(palette.ink)
+                        .multilineTextAlignment(.center).padding(.horizontal, 24)
+                        .position(x: g.size.width / 2, y: g.size.height * 0.42)
+                        .transition(.opacity)
+                        .accessibilityIdentifier("completion-reward")
                 }
             }
+        }
+        .onAppear { visible = true }
+        .onDisappear { visible = false; reward = false; reaction = nil }
+        .task(id: cueRunning) {
+            guard cueRunning else { cueTravel = 0; return }
+            do {
+                // One demonstration, then long quiet intervals. A drag cancels this task.
+                while !Task.isCancelled {
+                    try await Task.sleep(for: .seconds(1.2))
+                    withAnimation(.smooth(duration: 0.8)) { cueTravel = 17 }
+                    try await Task.sleep(for: .seconds(0.9))
+                    withAnimation(.smooth(duration: 0.3)) { cueTravel = 0 }
+                    try await Task.sleep(for: .seconds(6))
+                }
+            } catch { cueTravel = 0 }
         }
         .sensoryFeedback(.success, trigger: completed) { old, new in !old && new }
         .sensoryFeedback(.selection, trigger: taps)
@@ -103,11 +135,12 @@ public struct SceneInteraction<Art: View>: View {
         .task(id: reward) {
             guard reward else { return }
             do {
-                try await Task.sleep(for: .seconds(1.8))
+                try await Task.sleep(for: .seconds(2.6))
                 withAnimation(reduceMotion ? nil : .snappy) { reward = false }
                 reaction = nil
             } catch {}
         }
+        .onChange(of: active) { _, value in if !value { reaction = nil; reward = false } }
         .onChange(of: phase) { _, value in if value != .active { reaction = nil; reward = false } }
     }
 }

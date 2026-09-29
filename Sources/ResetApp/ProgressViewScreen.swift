@@ -5,13 +5,14 @@ import ResetCore
 @MainActor struct ResetProgressView: View {
     let session: ResetSession
     @Environment(\.colorScheme) private var scheme
+    @State private var rewardPresented = false
     @State private var historyPresented = false
     private var p: WorldPalette { WorldPalette(.focus, scheme) }
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 20) {
-                    WorldHeader("Look how far.", subtitle: "Every reset makes this space more yours.", palette: p)
+                    Text("Your little world").font(WorldType.hero)
                     ViewThatFits(in: .horizontal) {
                         HStack(alignment: .firstTextBaseline, spacing: 10) { streak; Spacer(minLength: 8); level }
                         VStack(alignment: .leading, spacing: 6) { streak; level }
@@ -22,34 +23,32 @@ import ResetCore
                         presented: $historyPresented, edit: session.editHistory)
                     ViewThatFits(in: .horizontal) {
                         HStack(alignment: .firstTextBaseline) {
-                            Text("A workspace you grow into").font(WorldType.title).fixedSize()
+                            Text("Your workspace").font(WorldType.title).fixedSize()
                             Spacer()
                             Text("\(session.progress.total) \(session.progress.total == 1 ? "reset" : "resets")").font(.subheadline).foregroundStyle(p.secondary).fixedSize()
                         }
                         VStack(alignment: .leading, spacing: 5) {
-                            Text("A workspace you grow into").font(WorldType.title)
+                            Text("Your workspace").font(WorldType.title)
                             Text("\(session.progress.total) \(session.progress.total == 1 ? "reset" : "resets")").font(.subheadline).foregroundStyle(p.secondary)
                         }
                     }
+                    Text(WorldRewards.nextSummary(total: session.progress.total, tone: p.tone))
+                        .font(.subheadline.weight(.medium)).foregroundStyle(p.accent)
+                        .fixedSize(horizontal: false, vertical: true)
                 }.padding(24).background(p.wall)
                 ZStack(alignment: .bottomTrailing) {
                     WorkspaceArtwork(progress: 1, level: session.progress.level, palette: p)
-                        .frame(height: 360)
-                    CompanionView(mood: .proud, accent: p.accent, active: !historyPresented)
-                        .frame(width: 84,height: 95).padding(.trailing,16).padding(.bottom,18)
-                }.frame(height: 360).accessibilityLabel("Your workspace at level \(session.progress.level)")
+
+                    WindowAtmosphere(palette: p, active: !historyPresented && !rewardPresented)
+                    CompanionGreeting(palette: p, active: !historyPresented && !rewardPresented)
+                        .frame(width: 100,height: 107).padding(.trailing,16).padding(.bottom,18)
+                }.aspectRatio(400.0 / 440.0, contentMode: .fit).accessibilityLabel("Your workspace at level \(session.progress.level)")
                 VStack(alignment: .leading, spacing: 22) {
-                    UnlockGallery(total: session.progress.total, thresholds: [5,10,15],
-                        titles: ["Desk plant","Studio print","Bookshelf"], palette: p)
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(session.progress.total >= 7 ? "Seven resets. Space for a new habit." : "Your first seven resets").font(.headline)
-                        Text("\(min(session.progress.total, 7)) of 7 resets. Any days count.")
-                            .font(.subheadline).foregroundStyle(p.floorSecondary)
-                        Text("Best streak: \(session.progress.bestStreak) \(session.progress.bestStreak == 1 ? "day" : "days")")
-                            .font(.caption).foregroundStyle(p.floorSecondary)
-                    }.padding(.vertical,6)
+                    UnlockGallery(total: session.progress.total, thresholds: WorldRewards.thresholds,
+                        titles: WorldRewards.titles(p.tone), palette: p, onPresentationChange: { rewardPresented = $0 })
+                    RitualTrail(count: min(session.progress.total, 7), best: session.progress.bestStreak, palette: p)
                 }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
-                    .background(WorldForeground(palette: p, sceneHeight: 360))
+                    .background { GeometryReader { g in WorldForeground(palette: p, sceneHeight: g.size.width * 1.1) } }
             }
         }.clipped().foregroundStyle(p.ink).background { VStack(spacing: 0) { p.wall; p.floor }.ignoresSafeArea() }.tint(p.accent)
     }
